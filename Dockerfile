@@ -7,17 +7,22 @@ WORKDIR /app
 
 RUN apk add --no-cache git
 
-# Copy dependency files
 COPY go.mod go.sum ./
 
 RUN go mod download
 
-# Copy source code
 COPY . .
 
-# Build binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    go build -ldflags="-s -w" -o otp-service ./cmd/app
+# Giảm parallel build để đỡ ăn CPU
+ENV GOMAXPROCS=2
+
+RUN CGO_ENABLED=0 \
+    go build \
+    -p 2 \
+    -trimpath \
+    -ldflags="-s -w" \
+    -o otp-service \
+    ./cmd/app
 
 # =========================================
 # Stage 2: Runtime
@@ -29,9 +34,7 @@ WORKDIR /app
 RUN apk add --no-cache ca-certificates tzdata
 
 COPY --from=builder /app/otp-service .
-
-# Copy config folder
-COPY --from=builder app/config ./config
+COPY --from=builder /app/config ./config
 
 EXPOSE 9999
 
