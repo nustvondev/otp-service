@@ -1,0 +1,57 @@
+# ##########################################
+# 1. Các file thực thi (Binaries & Outputs)
+# ##########################################
+# Loại bỏ các file thực thi được biên dịch sẵn
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Loại bỏ file chạy chính của Go (nếu bạn build ra file không có extension)
+# Bạn có thể đổi tên 'main' thành tên file build của dự án bạn nếu cần
+main
+bin/
+dist/
+out/
+
+# ##########################################
+# 2. Kiểm thử và Coverage (Testing)
+# ##########################################
+# Các file output khi chạy test hoặc đo coverage
+*.test
+*.out
+*.prof
+coverage.txt
+
+# ##########################################
+# 3. Quản lý Dependencies & Vendor
+# ##########################################
+# Nếu bạn dùng `go mod vendor`, thông thường KHÔNG NÊN bỏ qua thư mục vendor/
+# để đảm bảo tính nhất quán khi CI/CD. Nhưng nếu bạn muốn repo nhẹ, hãy mở comment dòng dưới:
+# vendor/
+
+# ##########################################
+# 4. Biến môi trường & Cấu hình bảo mật
+# ##########################################
+# TUYỆT ĐỐI không push các file chứa secret, API key lên Git
+.env
+.env.*
+!.env.example
+config.yaml
+config.json
+
+# ##########################################
+# 5. Công cụ phát triển & IDEs
+# ##########################################
+# JetBrains (GoLand, IntelliJ, v.v.)
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+
+# Các file rác của hệ điều hành
+.DS_Store
+Thumbs.db
