@@ -17,7 +17,7 @@ pipeline {
                 checkout scm
 
                 script {
-                    env.IMAGE_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(6)}"
+                    env.IMAGE_TAG  = "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(6)}"
                     env.FULL_IMAGE = "${env.IMAGE_NAME}:${env.IMAGE_TAG}"
                 }
 
@@ -47,6 +47,28 @@ pipeline {
                 }
             }
         }
+
+        stage('Update ecom-platform') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'github-creds',
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_TOKEN'
+                )]) {
+                    sh """
+                        git clone https://${GIT_USER}:${GIT_TOKEN}@github.com/nustvondev/ecom-platform.git ecom-platform
+
+                        cd ecom-platform
+                        sed -i 's/^OTP_SERVICE_TAG=.*/OTP_SERVICE_TAG=${IMAGE_TAG}/' .env
+                        git config user.email "jenkins@ci.local"
+                        git config user.name "Jenkins CI"
+                        git add .env
+                        git commit -m "ci: update otp-service tag to ${IMAGE_TAG}"
+                        git push origin main
+                    """
+                }
+            }
+        }
     }
 
     post {
@@ -55,6 +77,7 @@ pipeline {
                 echo "🧹 Cleaning up local image: ${FULL_IMAGE}"
                 docker rmi ${FULL_IMAGE} || true
                 docker image prune -f || true
+                rm -rf ecom-platform || true
             """
 
             deleteDir()
