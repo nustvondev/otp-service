@@ -55,17 +55,21 @@ pipeline {
                     usernameVariable: 'GIT_USER',
                     passwordVariable: 'GIT_TOKEN'
                 )]) {
-                    sh """
-                        git clone https://${GIT_USER}:${GIT_TOKEN}@github.com/nustvondev/ecom-platform.git ecom-platform
+                    sh '''
+                        git clone https://''' + GIT_USER + ''':''' + GIT_TOKEN + '''@github.com/nustvondev/ecom-platform.git ecom-platform
 
                         cd ecom-platform
-                        sed -i 's/^OTP_SERVICE_TAG=.*/OTP_SERVICE_TAG=${IMAGE_TAG}/' .env
+
+                        grep -q "^OTP_SERVICE_TAG=" .env.example \
+                            && sed -i "s/^OTP_SERVICE_TAG=.*/OTP_SERVICE_TAG=''' + env.IMAGE_TAG + '''/" .env.example \
+                            || echo "OTP_SERVICE_TAG=''' + env.IMAGE_TAG + '''" >> .env.example
+
                         git config user.email "jenkins@ci.local"
                         git config user.name "Jenkins CI"
-                        git add .env
-                        git commit -m "ci: update otp-service tag to ${IMAGE_TAG}"
+                        git add .env.example
+                        git commit -m "ci: update otp-service tag to ''' + env.IMAGE_TAG + '''"
                         git push origin main
-                    """
+                    '''
                 }
             }
         }
